@@ -1,5 +1,5 @@
 import { router } from '@kit.ArkUI'
-import { QueryParams, RouteParams, ApiRequest, ApiResponse, ApiResultData, POIParams, NearbyParams, CyclingParams, DistanceParams } from '../types/ApiTypes';
+import { QueryParams, RouteParams, ApiRequest, ApiResponse, ApiResultData, POIParams, NearbyParams, CyclingParams, DistanceParams, ToolResult } from '../types/ApiTypes';
 import { HttpClient } from '../utils/HttpClient';
 
 @Entry
@@ -216,17 +216,7 @@ struct ResultPage {
           .fontColor($r('app.color.text_primary'))
           .alignSelf(ItemAlign.Start)
 
-        Column({ space: 12 }) {
-          Text(JSON.stringify(this.result, null, 2))
-            .fontSize(14)
-            .fontColor($r('app.color.text_primary'))
-            .backgroundColor($r('app.color.surface'))
-            .padding(16)
-            .borderRadius(8)
-            .width('100%')
-            .copyOption(CopyOptions.InApp)
-        }
-        .width('100%')
+        this.buildVisualizedResult()
 
         // 操作按钮
         Row({ space: 8 }) {
@@ -243,10 +233,145 @@ struct ResultPage {
         }
         .width('100%')
         .margin({ top: 20 })
+
+        // 在最后加个垫片，避免被覆盖
+        Blank().height(180) // 先试 80，根据实际再微调
       }
       .width('100%')
       .padding(16)
     }
+  }
+
+  @Builder
+  buildVisualizedResult() {
+    Column({ space: 16 }) {
+      // 工具调用展示
+      if (this.result?.toolResults && Array.isArray(this.result.toolResults)) {
+        this.buildToolResults()
+      }
+
+      // 消息内容展示
+      this.buildMessageContent()
+    }
+    .width('100%')
+  }
+
+
+  @Builder
+  buildToolResults() {
+    Column({ space: 12 }) {
+      Text('🔧 工具调用详情')
+        .fontSize(16)
+        .fontWeight(FontWeight.Medium)
+        .fontColor($r('app.color.text_primary'))
+        .alignSelf(ItemAlign.Start)
+
+      ForEach(this.result?.toolResults || [], (tool: ToolResult, index: number) => {
+        this.buildToolItem(tool, index)
+      })
+    }
+    .width('100%')
+  }
+
+  @Builder
+  buildToolItem(tool: ToolResult, index: number) {
+    Column({ space: 8 }) {
+      // 工具头部
+      Row({ space: 8 }) {
+        Text(`#${index + 1}`)
+          .fontSize(12)
+          .fontColor($r('app.color.text_secondary'))
+          .backgroundColor($r('app.color.background'))
+          .padding({ left: 6, right: 6, top: 2, bottom: 2 })
+          .borderRadius(4)
+
+        Text(this.getToolName(tool))
+          .fontSize(14)
+          .fontWeight(FontWeight.Medium)
+          .fontColor($r('app.color.text_primary'))
+          .layoutWeight(1)
+
+        Text('🔧')
+          .fontSize(16)
+      }
+      .width('100%')
+      .alignItems(VerticalAlign.Center)
+
+      // 工具详情
+      Text(this.getToolDescription(tool))
+        .fontSize(13)
+        .fontColor($r('app.color.text_secondary'))
+        .textAlign(TextAlign.Start)
+        .width('100%')
+        .maxLines(3)
+        .textOverflow({ overflow: TextOverflow.Ellipsis })
+    }
+    .width('100%')
+    .padding(12)
+    .backgroundColor($r('app.color.surface'))
+    .borderRadius(6)
+    .border({
+      width: 1,
+      color: $r('app.color.background')
+    })
+  }
+
+  @Builder
+  buildMessageContent() {
+    if (this.result?.message) {
+      Column({ space: 8 }) {
+        Text('💬 响应消息')
+          .fontSize(16)
+          .fontWeight(FontWeight.Medium)
+          .fontColor($r('app.color.text_primary'))
+          .alignSelf(ItemAlign.Start)
+
+        Text(this.result.message)
+          .fontSize(14)
+          .fontColor($r('app.color.text_primary'))
+          .backgroundColor($r('app.color.surface'))
+          .padding(16)
+          .borderRadius(8)
+          .width('100%')
+          .copyOption(CopyOptions.InApp)
+      }
+      .width('100%')
+    }
+  }
+
+  @State showRawData: boolean = false;
+
+  getToolName(tool: ToolResult): string {
+    return tool?.name || '未知工具';
+  }
+
+  getToolDescription(tool: ToolResult): string {
+    if (tool?.status) {
+      const statusText = tool.status === 'SUCCESS' ? '✅ 执行成功' : '❌ 执行失败';
+      let description = statusText;
+      
+      if (tool.request) {
+        const requestKeys = Object.keys(tool.request);
+        if (requestKeys.length > 0) {
+          const params = requestKeys.map(key => `${key}: ${tool.request![key]}`).join(', ');
+          description += `\n参数: ${params}`;
+        }
+      }
+      
+      if (tool.response && tool.response.length > 0) {
+        const firstResponse = tool.response[0];
+        if (firstResponse.text && firstResponse.text.length > 0) {
+          const previewText = firstResponse.text.length > 100 
+            ? firstResponse.text.substring(0, 100) + '...' 
+            : firstResponse.text;
+          description += `\n返回: ${previewText}`;
+        }
+      }
+      
+      return description;
+    }
+    
+    return '工具调用详情';
   }
 
   getQueryTypeLabel(): string {

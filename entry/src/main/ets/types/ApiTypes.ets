@@ -81,6 +81,22 @@ export interface NearbyResult {
   distance?: string;
 }
 
+// 工具调用结果接口
+export interface ToolResult {
+  id?: string;
+  name?: string;
+  status?: string;
+  request?: Record<string, string | number>;
+  response?: Array<ResponseItem>;
+}
+
+export interface ResponseItem {
+  type?: string;
+  text?: string;
+  annotations?: Record<string, string | number> | null;
+  meta?: Record<string, string | number> | null;
+}
+
 // 通用API结果数据结构
 export interface ApiResultData {
   // 基础信息
@@ -88,10 +104,10 @@ export interface ApiResultData {
   status?: string;
 
   // SSE流式响应相关
-  toolResults?: Array<object>;
+  toolResults?: Array<ToolResult>;
   totalMessages?: number;
   totalTools?: number;
-  locationData?: Array<object>;
+  locationData?: Array<Record<string, string | number>>;
 
   // 位置相关信息
   latitude?: number;
