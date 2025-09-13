@@ -1,16 +1,50 @@
-import { router } from '@kit.ArkUI';
-import { queryConfigData, QueryOptionConfig, QueryField } from '../utils/config'
-import { QueryType, QueryParams, WeatherParams, POIParams, NearbyParams, CyclingParams, DistanceParams  } from '../types/ApiTypes';
+import { router, UIContext } from '@kit.ArkUI';
+import { common } from '@kit.AbilityKit';
+import buffer from '@ohos.buffer';
+import { util } from '@kit.ArkTS';
+import { QueryOptionConfig, QueryField, QueryConfig, QueryType, QueryParams, WeatherParams, POIParams, NearbyParams, CyclingParams, DistanceParams } from '../types/ApiTypes';
 
 @Entry
 @Component
 struct Index {
   @State message: string = 'Hello World';
   @State selectedType: string = QueryType.WEATHER;
-  availableOptions = queryConfigData.queryOptions;
-  @State selectedOption: QueryOptionConfig = this.availableOptions.filter((item) => item.type ===this.selectedType)[0] as QueryOptionConfig;
+  @State availableOptions: QueryOptionConfig[] = [];
+  @State selectedOption: QueryOptionConfig | null = null;
   // 动态表单字段
   @State formData: Record<string, string> = {};
+  uiContext = this.getUIContext();
+
+  aboutToAppear(): void {
+    this.loadConfigFromJSON();
+  }
+
+  private loadConfigFromJSON(): void {
+    const hostCxt = this.uiContext.getHostContext();
+    hostCxt?.resourceManager.getRawFileContent('query-config.json').then((value) => {
+      if (value.buffer.byteLength === 0) {
+        console.log('预览器环境，无法读取配置文件');
+        return;
+      }
+
+      const uint8Array = new Uint8Array(value.buffer);
+      const decoder = util.TextDecoder.create('utf-8');
+      const text: string = decoder.decodeWithStream(uint8Array, { stream: false });
+      console.log('配置文件内容:', text);
+
+      try {
+        const configData = JSON.parse(text) as QueryConfig;
+        this.availableOptions = configData.queryOptions;
+        this.selectedOption = this.availableOptions.find((item) => item.type === this.selectedType) || null;
+        console.log('配置数据加载成功:', configData);
+      } catch (error) {
+        console.error('配置文件解析失败:', error);
+      }
+    })
+      .catch((err: Error) => {
+        console.error('配置文件读取失败:', JSON.stringify(err));
+      });
+  }
 
   private resetFormData() {
     this.formData = {};
@@ -22,6 +56,12 @@ struct Index {
   }
 
   handleQuery() {
+    // 验证配置是否已加载
+    if (!this.selectedOption) {
+      console.error('配置未加载完成，请稍后再试');
+      return;
+    }
+
     // 验证必填字段
     const missingFields: string[] = [];
     this.selectedOption.fields.forEach(field => {
@@ -112,7 +152,7 @@ struct Index {
   build() {
     Scroll() {
       Column({ space: 10 }) {
-        Text('高德MCP查询助手')
+        Text('高德MCP查询助手--')
           .fontSize(24)
           .fontWeight(FontWeight.Bold)
           // .fontColor($r('app.color.text_primary'))

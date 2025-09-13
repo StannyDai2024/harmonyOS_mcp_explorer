@@ -9,11 +9,28 @@ export enum QueryType {
   CYCLING = 'cycling'
 }
 
-// 查询类型选项
-export interface QueryOption {
-  type: QueryType;
+// 动态表单字段定义
+export interface QueryField {
+  key: string;
+  label: string;
+  type: string;
+  placeholder: string;
+  required: boolean;
+}
+
+// 查询选项配置
+export interface QueryOptionConfig {
+  type: string;
   label: string;
   description: string;
+  icon: string;
+  enabled: boolean;
+  fields: Array<QueryField>;
+}
+
+// 配置文件结构
+export interface QueryConfig {
+  queryOptions: Array<QueryOptionConfig>;
 }
 
 // 基础查询参数接口
