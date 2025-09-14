@@ -2,7 +2,7 @@ import { router, UIContext } from '@kit.ArkUI';
 import { common } from '@kit.AbilityKit';
 import buffer from '@ohos.buffer';
 import { util } from '@kit.ArkTS';
-import { QueryOptionConfig, QueryField, QueryConfig, QueryType, QueryParams, WeatherParams, POIParams, NearbyParams, CyclingParams, DistanceParams } from '../types/ApiTypes';
+import { QueryOptionConfig, QueryField, QueryConfig, QueryType } from '../types/ApiTypes';
 
 @Entry
 @Component
@@ -65,7 +65,11 @@ struct Index {
     // 验证必填字段
     const missingFields: string[] = [];
     this.selectedOption.fields.forEach(field => {
-      if (field.required && (!this.formData[field.key] || this.formData[field.key].trim() === '')) {
+      if (field.required && 
+        (
+          !this.formData[field.key] || 
+          this.formData[field.key].trim() === ''
+        )) {
         missingFields.push(field.label);
       }
     });
@@ -76,66 +80,16 @@ struct Index {
       return;
     }
 
-    // 构建查询参数
-    const queryParams = this.buildQueryParams();
-    const queryText = this.buildQueryText();
-
-    console.log('查询参数:', JSON.stringify(queryParams, null, 2));
-    console.log('查询文本:', queryText);
-
     // 跳转到结果页面
     router.pushUrl({
       url: 'pages/ResultPage',
       params: {
-        queryParams: queryParams,
-        queryText: queryText
+        queryType: this.selectedType,
+        queryText: this.buildQueryText()
       }
     }).catch((error: Error) => {
       console.error('跳转结果页失败：', error);
     });
-  }
-
-  buildQueryParams(): QueryParams {
-    switch (this.selectedType) {
-      case QueryType.WEATHER:
-        return {
-          type: QueryType.WEATHER,
-          location: this.formData['location'] || ''
-        } as WeatherParams;
-
-      case QueryType.POI:
-        return {
-          type: QueryType.POI,
-          address: this.formData['address'] || ''
-        } as POIParams;
-
-      case QueryType.NEARBY:
-        return {
-          type: QueryType.NEARBY,
-          location: this.formData['location'] || '',
-          keyword: this.formData['keyword'] || ''
-        } as NearbyParams;
-
-      case QueryType.DISTANCE:
-        return {
-          type: QueryType.DISTANCE,
-          startLocation: this.formData['startLocation'] || '',
-          endLocation: this.formData['endLocation'] || ''
-        } as DistanceParams;
-
-      case QueryType.CYCLING:
-        return {
-          type: QueryType.CYCLING,
-          startLocation: this.formData['startLocation'] || '',
-          endLocation: this.formData['endLocation'] || ''
-        } as CyclingParams;
-
-      default:
-        return {
-          type: QueryType.WEATHER,
-          location: ''
-        } as WeatherParams;
-    }
   }
 
   buildQueryText(): string {
@@ -152,7 +106,7 @@ struct Index {
   build() {
     Scroll() {
       Column({ space: 10 }) {
-        Text('高德MCP查询助手--')
+        Text('高德MCP查询助手')
           .fontSize(24)
           .fontWeight(FontWeight.Bold)
           // .fontColor($r('app.color.text_primary'))

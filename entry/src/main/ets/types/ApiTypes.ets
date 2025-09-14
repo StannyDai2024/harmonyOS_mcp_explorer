@@ -33,69 +33,9 @@ export interface QueryConfig {
   queryOptions: Array<QueryOptionConfig>;
 }
 
-// 基础查询参数接口
-export interface BaseQueryParams {
-  type: QueryType;
-}
-
-// 天气查询参数
-export interface WeatherParams extends BaseQueryParams {
-  location: string;
-}
-
-// POI查询参数
-export interface POIParams extends BaseQueryParams {
-  address: string;
-}
-
-// 周边搜索参数
-export interface NearbyParams extends BaseQueryParams {
-  location: string;
-  keyword: string;
-}
-
-// 距离测量参数
-export interface DistanceParams extends BaseQueryParams {
-  startLocation: string;
-  endLocation: string;
-}
-
-// 骑行路径规划参数
-export interface CyclingParams extends BaseQueryParams {
-  startLocation: string;
-  endLocation: string;
-}
-
-// 联合查询参数类型
-export type QueryParams = WeatherParams | POIParams | NearbyParams | DistanceParams | CyclingParams;
-
-// API请求体中的消息项
-export interface ApiRequestMessage {
-  role: 'user' | 'assistant' | 'tool';
-  content: string;
-}
-
 // API请求体
 export interface ApiRequest {
   query: string;
-  memory?: Array<ApiRequestMessage>;
-}
-
-// 路径规划步骤
-export interface RouteStep {
-  instruction?: string;
-  distance?: string;
-  duration?: string;
-}
-
-// 周边搜索结果项
-export interface NearbyResult {
-  name?: string;
-  address?: string;
-  phone?: string;
-  latitude?: number;
-  longitude?: number;
-  distance?: string;
 }
 
 // 工具调用结果接口
@@ -122,49 +62,6 @@ export interface ApiResultData {
 
   // SSE流式响应相关
   toolResults?: Array<ToolResult>;
-  totalMessages?: number;
-  totalTools?: number;
-  locationData?: Array<Record<string, string | number>>;
-
-  // 位置相关信息
-  latitude?: number;
-  longitude?: number;
-  lat?: number;
-  lng?: number;
-  location?: string;
-  address?: string;
-
-  // POI相关信息
-  name?: string;
-  type?: string;
-  distance?: string;
-
-  // 联系方式
-  phone?: string;
-  tel?: string;
-
-  // 天气信息
-  weather?: string;
-  temperature?: string;
-  humidity?: string;
-  wind?: string;
-
-  // 路径规划
-  steps?: Array<RouteStep>;
-
-  // 周边搜索结果
-  results?: Array<NearbyResult>;
-
-  // 常见的其他字段
-  id?: string;
-  code?: string;
-  success?: boolean;
-  error?: string;
-  data?: object;
-  count?: number;
-  total?: number;
-  page?: number;
-  size?: number;
 }
 
 // API响应体
@@ -177,9 +74,8 @@ export interface ApiResponse {
 
 // 路由参数
 export interface RouteParams {
-  queryParams: QueryParams;
+  queryType: string;
   queryText: string;
-  cachedResult?: ApiResultData;
 }
 
 

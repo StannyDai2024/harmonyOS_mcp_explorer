@@ -1,7 +1,7 @@
 ## 真实请求
-1. 使用curl请求
+1. 使用 curl 发起真实请求
 ```
-daipeng@MacBook-Pro-3 harmony-mcp % curl --location --request POST 'https://aiae.appstage.myhuaweicloud.com/v1/routes/open/50c8ca0fb08e4c80878538af967d324f/execute' \
+curl --location --request POST 'https://aiae.appstage.myhuaweicloud.com/v1/routes/open/50c8ca0fb08e4c80878538af967d324f/execute' \
 --header 'Authorization: Bearer sk-055a0a667b860d15deb72ae0344d180e74c964a7f66e514734fbd3240f97c832' \
 --header 'Content-Type: application/json' \
 --data-raw '{

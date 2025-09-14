@@ -1,11 +1,11 @@
 import { router } from '@kit.ArkUI'
-import { QueryParams, RouteParams, ApiRequest, ApiResponse, ApiResultData, POIParams, NearbyParams, CyclingParams, DistanceParams, ToolResult } from '../types/ApiTypes';
+import { RouteParams, ApiRequest, ApiResponse, ApiResultData, ToolResult } from '../types/ApiTypes';
 import { HttpClient } from '../utils/HttpClient';
 
 @Entry
 @Component
 struct ResultPage {
-  @State queryParams?: QueryParams = undefined;
+  @State queryType: string = '';
   @State queryText: string = '';
   @State loading: boolean = false;
   @State result?: ApiResultData = undefined;
@@ -54,7 +54,7 @@ struct ResultPage {
       const params = router.getParams() as RouteParams;
       console.log('params', JSON.stringify(params, null, 2))
       if (params) {
-        this.queryParams = params.queryParams;
+        this.queryType = params.queryType || '';
         this.queryText = params.queryText || '';
       }
     } catch (error) {
@@ -375,9 +375,9 @@ struct ResultPage {
   }
 
   getQueryTypeLabel(): string {
-    if (!this.queryParams) return '';
+    if (!this.queryType) return '';
 
-    switch (this.queryParams.type) {
+    switch (this.queryType) {
       case 'weather': return '天气查询';
       case 'poi': return 'POI查询';
       case 'nearby': return '周边搜索';
