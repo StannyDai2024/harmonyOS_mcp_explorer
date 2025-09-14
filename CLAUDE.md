@@ -11,9 +11,16 @@ This is a HarmonyOS application that provides a MCP (Model Context Protocol) exp
 This project uses Hvigor as its build system, which is HarmonyOS's official build tool.
 
 ### Common Build Commands
-- **Build the project**: Use DevEco Studio's built-in build system or Hvigor commands
-- **Run tests**: Execute test targets through DevEco Studio
-- **Lint checking**: Configure through `code-linter.json5` with TypeScript ESLint rules and security rules
+- **Build the project**:
+  - Use DevEco Studio's built-in build system (recommended)
+  - Command line: `hvigor assembleHap` or `hvigor build`
+- **Run tests**:
+  - Execute unit tests: Through DevEco Studio test runner
+  - Test files located in: `entry/src/test/` (unit) and `entry/src/ohosTest/` (integration)
+- **Lint checking**:
+  - Configuration: `code-linter.json5` with TypeScript ESLint and security rules
+  - Manual linting: Use DevEco Studio's integrated linter or command line tools
+- **Clean build**: `hvigor clean`
 
 ### Code Quality
 The project is configured with:
@@ -72,6 +79,8 @@ The app uses a centralized configuration system where query options are defined 
 - Required form fields with validation
 - Icons and descriptions for user interface
 - Enable/disable flags for feature toggling
+
+**Key Configuration File**: `entry/src/main/resources/rawfile/query-config.json` - This JSON file defines all available query types and their form configurations. The app reads this file at runtime to dynamically generate the UI forms. When adding new query types or modifying existing ones, update this configuration file.
 
 ## Development Notes
 
